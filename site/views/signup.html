@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация на конференцию</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="/images/icon.ico">
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Конференция</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/index.html">Список зарегистрировавшихся</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/signin.html">Логин</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" href="/signup.html">Регистрация</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2 class="mt-5">Форма Регистрации</h2>
+        <form id="registrationForm" action="/submit_registration" method="post">
+            <div class="form-group">
+                <label for="firstName">Имя</label>
+                <input type="text" class="form-control" id="firstName" name="first_name" required>
+                <div id="firstNameError" class="text-danger"></div>
+            </div>
+            <div class="form-group">
+                <label for="lastName">Фамилия</label>
+                <input type="text" class="form-control" id="lastName" name="last_name" required>
+                <div id="lastNameError" class="text-danger"></div>
+            </div>
+            <div class="form-group">
+                <label for="gender">Пол</label>
+                <select class="form-control" id="gender" name="gender">
+                    <option value="male">Мужской</option>
+                    <option value="female">Женский</option>
+                </select>
+                <div id="genderError" class="text-danger"></div>
+            </div>
+            <div class="form-group">
+                <label for="nationality">Национальность</label>
+                <input type="text" class="form-control" id="nationality" name="nationality">
+                <div id="nationalityError" class="text-danger"></div>
+            </div>
+            <div class="form-group">
+                <label for="organization">Название Организации</label>
+                <input type="text" class="form-control" id="organization" name="organization">
+                <div id="organizationError" class="text-danger"></div>
+            </div>
+            <div class="form-group">
+                <label for="position">Должность</label>
+                <input type="text" class="form-control" id="position" name="position">
+                <div id="positionError" class="text-danger"></div>
+            </div>
+            <div class="form-group">
+                <label for="dob">Дата Рождения</label>
+                <input type="date" class="form-control" id="dob" name="date_of_birth" required>
+                <div id="dobError" class="text-danger"></div>
+            </div>
+            <div class="form-group">
+                <label for="email">E-Mail</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+                <div id="emailError" class="text-danger"></div>
+            </div>
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+                <div id="passwordError" class="text-danger"></div>
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Подтвердите Пароль</label>
+                <input type="password" class="form-control" id="confirmPassword" name="confirm_password" required>
+                <div id="confirmPasswordError" class="text-danger"></div>
+            </div>
+            <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+        </form>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $('#registrationForm').on('submit', function(e) {
+            e.preventDefault();
+            $.post('/submit_registration', $(this).serialize())
+                .done(function() {
+                    window.location.href = '/index.html';
+                })
+                .fail(function(xhr) {
+                    if (xhr.status === 400) {
+                        const errors = xhr.responseJSON;
+                        $('.text-danger').empty();
+                        for (const key in errors) {
+                            $('#' + key + 'Error').text(errors[key]);
+                        }
+                    } else {
+                        alert("Произошла ошибка на сервере");
+                    }
+                });
+        });
+    </script>
+</body>
+</html>

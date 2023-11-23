@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Список участников</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="/images/icon.ico">
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">Конференция</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/index.html">Список зарегистрировавшихся</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/signin.html">Логин</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/signup.html">Регистрация</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2 class="mt-5">Список зарегистрировавшихся участников</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>№</th>
+                    <th>Имя Фамилия</th>
+                    <th>Название Организации</th>
+                    <th>E-Mail</th>
+                    <th>Действие</th>
+                </tr>
+            </thead>
+            <tbody id="userList">
+            </tbody>
+        </table>
+    </div>
+
+    <div class="modal" tabindex="-1" role="dialog" id="editModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Редактирование пользователя</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="editForm">
+                        <input type="hidden" id="editUserId">
+                        <div class="form-group">
+                            <label for="editFirstName">Имя</label>
+                            <input type="text" class="form-control" id="editFirstName" name="first_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editLastName">Фамилия</label>
+                            <input type="text" class="form-control" id="editLastName" name="last_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editGender">Пол</label>
+                            <select class="form-control" id="editGender" name="gender" required>
+                                <option value="male">Мужской</option>
+                                <option value="female">Женский</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="editNationality">Национальность</label>
+                            <input type="text" class="form-control" id="editNationality" name="nationality" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editOrganization">Название Организации</label>
+                            <input type="text" class="form-control" id="editOrganization" name="organization" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editPosition">Должность</label>
+                            <input type="text" class="form-control" id="editPosition" name="position" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editDOB">Дата Рождения</label>
+                            <input type="date" class="form-control" id="editDOB" name="date_of_birth" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="editEmail">E-Mail</label>
+                            <input type="email" class="form-control" id="editEmail" name="email" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $.get('/get_users', function(users) {
+                users.forEach(function(user, index) {
+                    $('#userList').append(
+                        `<tr>
+                            <td>${index + 1}</td>
+                            <td>${user.first_name} ${user.last_name}</td>
+                            <td>${user.organization}</td>
+                            <td>${user.email}</td>
+                            <td>${user.isEditable ? '<button class="btn btn-primary btn-edit" data-userid="' + user.id + '">Редактировать</button>' : ''}</td>
+                        </tr>`
+                    );
+                });
+            }).fail(function(err) {
+                if(err.status === 403) {
+                    window.location.href = '/unauthorized';
+                }
+            });
+        });
+
+        $(document).on('click', '.btn-edit', function() {
+            var userId = $(this).data('userid');
+            
+            // Запрос к серверу для получения данных пользователя
+            $.get('/get_user/' + userId, function(user) {
+                // Заполнение полей формы данными пользователя
+                $('#editUserId').val(user.id);
+                $('#editFirstName').val(user.first_name);
+                $('#editLastName').val(user.last_name);
+                $('#editGender').val(user.gender);
+                $('#editNationality').val(user.nationality);
+                $('#editOrganization').val(user.organization);
+                $('#editPosition').val(user.position);
+                $('#editDOB').val(user.date_of_birth);
+                $('#editEmail').val(user.email);
+
+                // Открытие модального окна
+                $('#editModal').modal('show');
+            }).fail(function() {
+                alert("Ошибка при получении данных пользователя.");
+            });
+        });
+
+        // Обработка отправки формы
+        $('#editForm').on('submit', function(e) {
+            e.preventDefault();
+
+            var userData = {
+                id: $('#editUserId').val(),
+                first_name: $('#editFirstName').val(),
+                last_name: $('#editLastName').val(),
+                gender: $('#editGender').val(),
+                nationality: $('#editNationality').val(),
+                organization: $('#editOrganization').val(),
+                position: $('#editPosition').val(),
+                date_of_birth: $('#editDOB').val(),
+                email: $('#editEmail').val()
+            };
+
+            // Отправка данных на сервер
+            $.post('/edit_user', userData, function(response) {
+                // Обработка ответа сервера
+                $('#editModal').modal('hide');
+                location.reload();
+            }).fail(function(error) {
+                // Обработка ошибки запроса
+                alert('Ошибка при обновлении данных пользователя');
+            });
+        });
+
+    </script>
+</body>
+</html>

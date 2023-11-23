@@ -1,0 +1,19 @@
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    gender ENUM('male', 'female'),
+    nationality VARCHAR(100),
+    organization VARCHAR(100),
+    position VARCHAR(100),
+    date_of_birth DATE,
+    email VARCHAR(100),
+    password VARCHAR(255)
+);
+
+CREATE TABLE logged_in_users (
+    user_id INT,
+    login_time DATETIME,
+    session_id VARCHAR(255),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
